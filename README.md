@@ -2,19 +2,6 @@
 
 **A full-stack web application that allows students to review and rate college dining halls using their `.edu` email, complete with pictures, voting, and multi-campus support.**
 
-## 📚 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [API Endpoints](#api-endpoints)
-- [Environment Variables](#environment-variables)
-- [Testing](#testing)
-- [Deployment](#deployment)
-
 ## 🧠 Overview
 
 Rate My Dining Hall enables authenticated students to post reviews, upload optional images, and upvote/downvote dining hall experiences across different campuses. Designed to be lightweight and scalable, the app makes it easy to add new schools and their dining locations.
