@@ -1,19 +1,19 @@
-# 🍽️ Rate My Dining Hall
+# Rate My Dining Hall
 
 **A full-stack web application that allows students to review and rate college dining halls using their `.edu` email, complete with pictures, voting, and multi-campus support.**
 
-## 🧠 Overview
+## Overview
 
 Rate My Dining Hall enables authenticated students to post reviews, upload optional images, and upvote/downvote dining hall experiences across different campuses. Designed to be lightweight and scalable, the app makes it easy to add new schools and their dining locations.
 
-## 🚀 Features
+## Features
 
-- 🔐 Sign up with `.edu` email authentication
-- 🏫 Support for multiple schools and dining halls
-- ✍️ Post dining hall reviews with optional photos
-- 👍👎 Upvote and downvote reviews
-- 📸 Upload images with reviews (Cloudinary or S3)
-- 📦 Easy admin-driven or self-service addition of schools and halls
+- Sign up with `.edu` email authentication
+- Support for multiple schools and dining halls
+- Post dining hall reviews with optional photos
+- Upvote and downvote reviews
+- Upload images with reviews (Cloudinary or S3)
+- Easy admin-driven or self-service addition of schools and halls
 
 ## 🛠 Tech Stack
 
@@ -34,7 +34,7 @@ Rate My Dining Hall enables authenticated students to post reviews, upload optio
 - GitHub Actions
 - Azure WebApps or Render
 
-## 🏗️ Architecture
+## Architecture
 
 ```text
              ┌────────────────────────────┐
@@ -55,7 +55,7 @@ Rate My Dining Hall enables authenticated students to post reviews, upload optio
 └─────────────────┘           └────────────────────┘
 ```
 
-## 🧰 Getting Started
+## Getting Started
 Prerequisites
 - Docker + Docker Compose
 - Node.js ≥ 18.x
@@ -76,9 +76,9 @@ docker-compose up --build
 - Frontend: http://localhost:5173
 - Backend: http://localhost:8000/docs
 
-## 🧩 API Endpoints
+## API Endpoints
 
-### 🔐 Auth & User
+### Auth & User
 
 | Method | Endpoint             | Description                            |
 |--------|----------------------|----------------------------------------|
@@ -86,7 +86,7 @@ docker-compose up --build
 | POST   | `/api/auth/login`    | Login and receive JWT                  |
 | GET    | `/api/users/me`      | Get current user profile               |
 
-### 🏫 Schools & Dining Halls
+### Schools & Dining Halls
 
 | Method | Endpoint                  | Description                      |
 |--------|---------------------------|----------------------------------|
@@ -95,7 +95,7 @@ docker-compose up --build
 | GET    | `/api/dining-halls`       | List all dining halls            |
 | POST   | `/api/dining-halls`       | Add a new dining hall *(admin)* |
 
-### ✍️ Reviews
+### Reviews
 
 | Method | Endpoint                | Description                   |
 |--------|-------------------------|-------------------------------|
@@ -105,21 +105,21 @@ docker-compose up --build
 | PATCH  | `/api/reviews/{id}`     | Edit an existing review       |
 | DELETE | `/api/reviews/{id}`     | Delete a review               |
 
-### 👍👎 Votes
+### Votes
 
 | Method | Endpoint                      | Description                       |
 |--------|-------------------------------|-----------------------------------|
 | POST   | `/api/votes`                  | Submit an upvote or downvote      |
 | GET    | `/api/reviews/{id}/votes`     | Get vote summary for a review     |
 
-### 📦 Misc
+### Misc
 
 | Method | Endpoint     | Description           |
 |--------|--------------|-----------------------|
 | GET    | `/ping`      | Health check endpoint |
 | GET    | `/docs`      | Swagger/OpenAPI docs  |
 
-## 🔐 Environment Variables
+## Environment Variables
 Create a .env file in the root with the following:
 ```dotenv
 # Shared
@@ -135,7 +135,7 @@ CLOUDINARY_URL=cloudinary://...
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
-## ✅ Testing
+## Testing
 Run unit and integration tests:
 ```bash
 # Backend
@@ -156,7 +156,7 @@ ruff . && black .
 npm run lint && npm run format
 ```
 
-## 🚀 Deployment
+## Deployment
 Use GitHub Actions to deploy Docker containers:
 - Backend to Azure WebApps or Render
 - Frontend to Vercel or Netlify
