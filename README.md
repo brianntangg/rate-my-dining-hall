@@ -15,7 +15,7 @@ Rate My Dining Hall enables authenticated students to post reviews, upload optio
 - Upload images with reviews (Cloudinary or S3)
 - Easy admin-driven or self-service addition of schools and halls
 
-## 🛠 Tech Stack
+## Tech Stack
 
 **Frontend**
 - React + TypeScript
