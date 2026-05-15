@@ -1,80 +1,123 @@
 # Rate My Dining Hall
 
-**A full-stack web application that allows students to review and rate college dining halls using their `.edu` email, complete with pictures, voting, and multi-campus support.**
+**A full-stack web application for Vanderbilt University students to review and rate campus dining halls with upvoting/downvoting functionality.**
 
 ## Overview
 
-Rate My Dining Hall enables authenticated students to post reviews, upload optional images, and upvote/downvote dining hall experiences across different campuses. Designed to be lightweight and scalable, the app makes it easy to add new schools and their dining locations.
+Rate My Dining Hall is an MVP web application that enables Vanderbilt students to authenticate with their `@vanderbilt.edu` email, browse dining halls, post reviews with 1-5 star ratings, and upvote/downvote other students' reviews. The architecture is designed to be scalable to multiple universities.
 
 ## Features
 
-- Sign up with `.edu` email authentication
-- Support for multiple schools and dining halls
-- Post dining hall reviews with optional photos
-- Upvote and downvote reviews
-- Upload images with reviews (Cloudinary or S3)
-- Easy admin-driven or self-service addition of schools and halls
+- ✅ Email authentication with `@vanderbilt.edu` domain validation
+- ✅ JWT-based authentication with 7-day expiry
+- ✅ Browse Vanderbilt dining halls (Commons, E. Bronson Ingram, Rand, 2301)
+- ✅ Post 1-5 star reviews with text (minimum 10 characters)
+- ✅ Upvote and downvote reviews from other students
+- ✅ Delete your own reviews
+- ✅ View average ratings for each dining hall
+- ✅ Responsive UI with Tailwind CSS
+- ✅ Real-time loading and error states
+
+## Planned Features (Post-MVP)
+
+- Image uploads with reviews (Cloudinary)
+- Redis caching for performance
+- Review editing
+- Admin panel for managing dining halls
+- Multi-school support
+- Email verification
 
 ## Tech Stack
 
-**Frontend**
+### Frontend
+
 - React + TypeScript
 - Vite
-- Tailwind CSS or Material UI
-- TanStack Query
+- Tailwind CSS
+- TanStack Query (React Query)
+- Axios
+- React Router DOM
+- React Toastify
 
-**Backend**
+### Backend
+
 - FastAPI
-- SQLAlchemy or SQLModel + Pydantic
+- SQLModel + Pydantic
 - PostgreSQL
-- Redis
+- Alembic (migrations)
+- python-jose (JWT)
+- passlib (password hashing)
 
-**DevOps**
-- Docker
-- GitHub Actions
-- Azure WebApps or Render
+### DevOps
 
-## Architecture
+- Docker + Docker Compose
+- GitHub Actions (CI)
+- Render (backend deployment)
+- Vercel (frontend deployment)
+
+## Database Schema
 
 ```text
-             ┌────────────────────────────┐
-             │     Client (React App)     │
-             │  (Vite + TypeScript + UI)  │
-             └────────────┬───────────────┘
-                          │  REST API
-                          ▼
-             ┌────────────────────────────┐
-             │      FastAPI Backend       │
-             │  (Python + Pydantic + ORM) │
-             └────────────┬───────────────┘
-          ┌───────────────┴───────────────┐
-          ▼                               ▼
-┌─────────────────┐           ┌────────────────────┐
-│   PostgreSQL    │           │       Redis        │
-│ (Review Storage)│           │ (Cache, Rate Limit)│
-└─────────────────┘           └────────────────────┘
+School (id, name, allowed_domain)
+  ↓ 1:N
+DiningHall (id, name, school_id)
+  ↓ 1:N
+Review (id, user_id, dining_hall_id, rating, text, created_at)
+  ↓ 1:N
+Vote (id, user_id, review_id, value)
+
+User (id, email, hashed_password, school_id, created_at)
+  ↓ 1:N Reviews, Votes
 ```
 
-## Getting Started
-Prerequisites
+## Quick Start
+
+### Prerequisites
+
 - Docker + Docker Compose
-- Node.js ≥ 18.x
-- Python ≥ 3.11
 
-Setup
-```bash
-git clone https://github.com/yourname/rate-my-dining-hall.git
-cd rate-my-dining-hall
-cp .env.example .env
-```
+### Setup
 
-Start App
-```
-# From root directory
-docker-compose up --build
-```
-- Frontend: http://localhost:5173
-- Backend: http://localhost:8000/docs
+1. **Clone the repository**
+
+   ```bash
+   git clone <your-repo-url>
+   cd rate-my-dining-hall
+   ```
+
+2. **Create and configure environment file**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Then generate and set a secret key (required — the app will not start without it):
+
+   ```bash
+   openssl rand -hex 32  # copy the output into JWT_SECRET in .env
+   ```
+
+3. **Start all services**
+
+   ```bash
+   docker-compose up
+   ```
+
+4. **Access the application**
+
+   - Frontend: <http://localhost:5173>
+   - Backend API docs: <http://localhost:8000/docs>
+   - Health check: <http://localhost:8000/ping>
+
+### First Time Setup
+
+The application will automatically:
+
+- Run database migrations
+- Seed Vanderbilt University and dining halls
+- Start the backend and frontend servers
+
+For detailed setup instructions, see [DEVELOPMENT.md](DEVELOPMENT.md)
 
 ## API Endpoints
 
@@ -82,35 +125,33 @@ docker-compose up --build
 
 | Method | Endpoint             | Description                            |
 |--------|----------------------|----------------------------------------|
-| POST   | `/api/auth/register` | Register with `.edu` email             |
+| POST   | `/api/auth/register` | Register with `@vanderbilt.edu` email  |
 | POST   | `/api/auth/login`    | Login and receive JWT                  |
-| GET    | `/api/users/me`      | Get current user profile               |
+| GET    | `/api/auth/me`       | Get current user profile               |
 
 ### Schools & Dining Halls
 
 | Method | Endpoint                  | Description                      |
 |--------|---------------------------|----------------------------------|
 | GET    | `/api/schools`            | List all schools                 |
-| POST   | `/api/schools`            | Add a new school *(admin)*       |
-| GET    | `/api/dining-halls`       | List all dining halls            |
-| POST   | `/api/dining-halls`       | Add a new dining hall *(admin)* |
+| GET    | `/api/dining-halls`       | List all dining halls (filterable by school_id) |
+| GET    | `/api/dining-halls/{id}`  | Get a dining hall with average rating |
 
 ### Reviews
 
 | Method | Endpoint                | Description                   |
 |--------|-------------------------|-------------------------------|
-| GET    | `/api/reviews`          | List all reviews              |
+| GET    | `/api/reviews`          | List reviews (filtered by dining_hall_id, paginated) |
 | GET    | `/api/reviews/{id}`     | Get a specific review         |
-| POST   | `/api/reviews`          | Create a new review           |
-| PATCH  | `/api/reviews/{id}`     | Edit an existing review       |
-| DELETE | `/api/reviews/{id}`     | Delete a review               |
+| POST   | `/api/reviews`          | Create a new review (auth required) |
+| DELETE | `/api/reviews/{id}`     | Delete your own review (auth required) |
 
 ### Votes
 
-| Method | Endpoint                      | Description                       |
-|--------|-------------------------------|-----------------------------------|
-| POST   | `/api/votes`                  | Submit an upvote or downvote      |
-| GET    | `/api/reviews/{id}/votes`     | Get vote summary for a review     |
+| Method | Endpoint                        | Description                    |
+|--------|---------------------------------|--------------------------------|
+| POST   | `/api/votes`                    | Submit an upvote or downvote   |
+| GET    | `/api/votes/{review_id}/votes`  | Get vote summary for a review  |
 
 ### Misc
 
@@ -120,45 +161,84 @@ docker-compose up --build
 | GET    | `/docs`      | Swagger/OpenAPI docs  |
 
 ## Environment Variables
-Create a .env file in the root with the following:
-```dotenv
-# Shared
-JWT_SECRET=your-secret
-ALLOWED_EMAIL_DOMAIN=.edu
 
+See `.env.example` for all available variables. Key variables:
+
+```env
 # Backend
-DATABASE_URL=postgresql://user:pass@db:5432/rmdh
-REDIS_URL=redis://redis:6379/0
-CLOUDINARY_URL=cloudinary://...
+DATABASE_URL=postgresql://rmdh_user:rmdh_password@db:5432/rmdh
+JWT_SECRET=<generate with: openssl rand -hex 32>
+ALLOWED_EMAIL_DOMAIN=vanderbilt.edu
+BACKEND_CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 # Frontend
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
 ## Testing
-Run unit and integration tests:
+
+### Backend Tests
+
 ```bash
-# Backend
 cd backend
-pytest
-
-# Frontend
-cd frontend
-npm test
+pytest -v
 ```
 
-Linting and formatting:
+Run with coverage:
+
 ```bash
-# Backend
-ruff . && black .
-
-# Frontend
-npm run lint && npm run format
+pytest --cov=app --cov-report=html
 ```
+
+### CI/CD
+
+GitHub Actions automatically runs tests on push and pull requests. See `.github/workflows/ci.yml` for configuration.
 
 ## Deployment
-Use GitHub Actions to deploy Docker containers:
-- Backend to Azure WebApps or Render
-- Frontend to Vercel or Netlify
-- Configure CI to run tests and linting on pull requests
 
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions to:
+
+- Backend: Render
+- Frontend: Vercel
+- Database: Render PostgreSQL
+
+## Development
+
+For detailed development instructions, including manual setup without Docker, database migrations, and contribution guidelines, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
+## Project Structure
+
+```text
+rate-my-dining-hall/
+├── backend/              # FastAPI backend
+│   ├── app/
+│   │   ├── models/      # SQLModel database models
+│   │   ├── routers/     # API endpoints
+│   │   ├── schemas/     # Pydantic schemas
+│   │   └── ...
+│   ├── alembic/         # Database migrations
+│   ├── tests/           # Pytest tests
+│   └── requirements.txt
+├── frontend/            # React frontend
+│   ├── src/
+│   │   ├── api/        # API client
+│   │   ├── components/ # React components
+│   │   ├── contexts/   # React contexts
+│   │   ├── pages/      # Page components
+│   │   └── ...
+│   └── package.json
+├── docker-compose.yml   # Docker Compose config
+└── .env.example         # Environment variables template
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Support
+
+For issues and questions, please open a GitHub issue.
