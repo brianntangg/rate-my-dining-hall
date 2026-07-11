@@ -4,7 +4,7 @@
 
 ## Overview
 
-Rate My Dining Hall is an MVP web application that enables Vanderbilt students to authenticate with their `@vanderbilt.edu` email, browse dining halls, post reviews with 1-5 star ratings, and upvote/downvote other students' reviews. The architecture is designed to be scalable to multiple universities.
+Vandy Eats is an MVP web application that enables Vanderbilt students to authenticate with their `@vanderbilt.edu` email, browse dining halls, post reviews with 1-5 star ratings, and upvote/downvote other students' reviews. The architecture is designed to be scalable to multiple universities.
 
 ## Features
 
