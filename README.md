@@ -1,4 +1,4 @@
-# Rate My Dining Hall
+# Vandy Eats
 
 **A full-stack web application for Vanderbilt University students to review and rate campus dining halls with upvoting/downvoting functionality.**
 
