@@ -2,8 +2,6 @@
 
 A full-stack web app where Vanderbilt students review and rate campus dining halls — post 1–5 star reviews, and upvote or downvote what other students say.
 
-![Screenshot](docs/screenshot.png)
-
 ## Overview
 
 Students authenticate with their `@vanderbilt.edu` email, browse dining halls (Commons, E. Bronson Ingram, Rand, 2301), post reviews, and vote on each other's feedback. The schema is school-scoped (`School → DiningHall → Review → Vote`), so adding another university is a data change, not a rewrite.
