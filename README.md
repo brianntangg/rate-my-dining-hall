@@ -50,7 +50,7 @@ User (id, email, hashed_password, school_id, created_at)
 1. **Clone and enter the repo**
 
    ```bash
-   git clone https://github.com/brianntangg/vandy-eats
+   git clone https://github.com/brianntangg/vandy-eats.git
    cd vandy-eats
    ```
 
