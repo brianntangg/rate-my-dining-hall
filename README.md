@@ -1,59 +1,28 @@
 # Vandy Eats
 
-**A full-stack web application for Vanderbilt University students to review and rate campus dining halls with upvoting/downvoting functionality.**
+A full-stack web app where Vanderbilt students review and rate campus dining halls — post 1–5 star reviews, and upvote or downvote what other students say.
+
+![Screenshot](docs/screenshot.png)
 
 ## Overview
 
-Vandy Eats is an MVP web application that enables Vanderbilt students to authenticate with their `@vanderbilt.edu` email, browse dining halls, post reviews with 1-5 star ratings, and upvote/downvote other students' reviews. The architecture is designed to be scalable to multiple universities.
+Students authenticate with their `@vanderbilt.edu` email, browse dining halls (Commons, E. Bronson Ingram, Rand, 2301), post reviews, and vote on each other's feedback. The schema is school-scoped (`School → DiningHall → Review → Vote`), so adding another university is a data change, not a rewrite.
 
 ## Features
 
-- ✅ Email authentication with `@vanderbilt.edu` domain validation
-- ✅ JWT-based authentication with 7-day expiry
-- ✅ Browse Vanderbilt dining halls (Commons, E. Bronson Ingram, Rand, 2301)
-- ✅ Post 1-5 star reviews with text (minimum 10 characters)
-- ✅ Upvote and downvote reviews from other students
-- ✅ Delete your own reviews
-- ✅ View average ratings for each dining hall
-- ✅ Responsive UI with Tailwind CSS
-- ✅ Real-time loading and error states
-
-## Planned Features (Post-MVP)
-
-- Image uploads with reviews (Cloudinary)
-- Redis caching for performance
-- Review editing
-- Admin panel for managing dining halls
-- Multi-school support
-- Email verification
+- Email authentication restricted to `@vanderbilt.edu`, with JWT sessions (7-day expiry)
+- 1–5 star reviews with text, and delete-your-own-review support
+- Upvoting/downvoting on reviews from other students
+- Live average rating per dining hall
+- Responsive UI (Tailwind) with loading and error states throughout
 
 ## Tech Stack
 
-### Frontend
-
-- React + TypeScript
-- Vite
-- Tailwind CSS
-- TanStack Query (React Query)
-- Axios
-- React Router DOM
-- React Toastify
-
-### Backend
-
-- FastAPI
-- SQLModel + Pydantic
-- PostgreSQL
-- Alembic (migrations)
-- python-jose (JWT)
-- passlib (password hashing)
-
-### DevOps
-
-- Docker + Docker Compose
-- GitHub Actions (CI)
-- Render (backend deployment)
-- Vercel (frontend deployment)
+| Layer    | Tech |
+| -------- | ---- |
+| Frontend | React, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router |
+| Backend  | FastAPI, SQLModel + Pydantic, PostgreSQL, Alembic migrations, JWT (python-jose), passlib |
+| DevOps   | Docker Compose, GitHub Actions CI, Render (backend), Vercel (frontend) |
 
 ## Database Schema
 
@@ -78,167 +47,83 @@ User (id, email, hashed_password, school_id, created_at)
 
 ### Setup
 
-1. **Clone the repository**
+1. **Clone and enter the repo**
 
    ```bash
-   git clone <your-repo-url>
-   cd rate-my-dining-hall
+   git clone https://github.com/brianntangg/vandy-eats
+   cd vandy-eats
    ```
 
-2. **Create and configure environment file**
+2. **Configure environment**
 
    ```bash
    cp .env.example .env
+   openssl rand -hex 32   # paste output into JWT_SECRET in .env (required)
    ```
 
-   Then generate and set a secret key (required — the app will not start without it):
-
-   ```bash
-   openssl rand -hex 32  # copy the output into JWT_SECRET in .env
-   ```
-
-3. **Start all services**
+3. **Start everything**
 
    ```bash
    docker-compose up
    ```
 
-4. **Access the application**
+4. **Open the app**
 
    - Frontend: <http://localhost:5173>
-   - Backend API docs: <http://localhost:8000/docs>
+   - API docs (Swagger): <http://localhost:8000/docs>
    - Health check: <http://localhost:8000/ping>
 
-### First Time Setup
+First startup automatically runs migrations and seeds Vanderbilt's dining halls. For manual (non-Docker) setup, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
-The application will automatically:
+## API
 
-- Run database migrations
-- Seed Vanderbilt University and dining halls
-- Start the backend and frontend servers
+| Method | Endpoint                        | Description |
+|--------|---------------------------------|-------------|
+| POST   | `/api/auth/register`            | Register with `@vanderbilt.edu` email |
+| POST   | `/api/auth/login`               | Login, receive JWT |
+| GET    | `/api/auth/me`                  | Current user profile |
+| GET    | `/api/schools`                  | List schools |
+| GET    | `/api/dining-halls`             | List dining halls (filter by `school_id`) |
+| GET    | `/api/dining-halls/{id}`        | Dining hall with average rating |
+| GET    | `/api/reviews`                  | List reviews (filter by `dining_hall_id`, paginated) |
+| POST   | `/api/reviews`                  | Create review (auth) |
+| DELETE | `/api/reviews/{id}`             | Delete your own review (auth) |
+| POST   | `/api/votes`                    | Upvote or downvote |
+| GET    | `/api/votes/{review_id}/votes`  | Vote summary for a review |
 
-For detailed setup instructions, see [DEVELOPMENT.md](DEVELOPMENT.md)
+Full interactive docs at `/docs` when running.
 
-## API Endpoints
-
-### Auth & User
-
-| Method | Endpoint             | Description                            |
-|--------|----------------------|----------------------------------------|
-| POST   | `/api/auth/register` | Register with `@vanderbilt.edu` email  |
-| POST   | `/api/auth/login`    | Login and receive JWT                  |
-| GET    | `/api/auth/me`       | Get current user profile               |
-
-### Schools & Dining Halls
-
-| Method | Endpoint                  | Description                      |
-|--------|---------------------------|----------------------------------|
-| GET    | `/api/schools`            | List all schools                 |
-| GET    | `/api/dining-halls`       | List all dining halls (filterable by school_id) |
-| GET    | `/api/dining-halls/{id}`  | Get a dining hall with average rating |
-
-### Reviews
-
-| Method | Endpoint                | Description                   |
-|--------|-------------------------|-------------------------------|
-| GET    | `/api/reviews`          | List reviews (filtered by dining_hall_id, paginated) |
-| GET    | `/api/reviews/{id}`     | Get a specific review         |
-| POST   | `/api/reviews`          | Create a new review (auth required) |
-| DELETE | `/api/reviews/{id}`     | Delete your own review (auth required) |
-
-### Votes
-
-| Method | Endpoint                        | Description                    |
-|--------|---------------------------------|--------------------------------|
-| POST   | `/api/votes`                    | Submit an upvote or downvote   |
-| GET    | `/api/votes/{review_id}/votes`  | Get vote summary for a review  |
-
-### Misc
-
-| Method | Endpoint     | Description           |
-|--------|--------------|-----------------------|
-| GET    | `/ping`      | Health check endpoint |
-| GET    | `/docs`      | Swagger/OpenAPI docs  |
-
-## Environment Variables
-
-See `.env.example` for all available variables. Key variables:
-
-```env
-# Backend
-DATABASE_URL=postgresql://rmdh_user:rmdh_password@db:5432/rmdh
-JWT_SECRET=<generate with: openssl rand -hex 32>
-ALLOWED_EMAIL_DOMAIN=vanderbilt.edu
-BACKEND_CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-
-# Frontend
-VITE_API_BASE_URL=http://localhost:8000
-```
-
-## Testing
-
-### Backend Tests
+## Testing & CI
 
 ```bash
 cd backend
-pytest -v
+pytest -v                                    # run tests
+pytest --cov=app --cov-report=html           # with coverage
 ```
 
-Run with coverage:
+GitHub Actions runs the test suite on every push and pull request (`.github/workflows/ci.yml`).
 
-```bash
-pytest --cov=app --cov-report=html
-```
+## Roadmap
 
-### CI/CD
-
-GitHub Actions automatically runs tests on push and pull requests. See `.github/workflows/ci.yml` for configuration.
-
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions to:
-
-- Backend: Render
-- Frontend: Vercel
-- Database: Render PostgreSQL
-
-## Development
-
-For detailed development instructions, including manual setup without Docker, database migrations, and contribution guidelines, see [DEVELOPMENT.md](DEVELOPMENT.md).
+Image uploads (Cloudinary), Redis caching, review editing, admin panel, multi-school rollout, email verification.
 
 ## Project Structure
 
 ```text
-rate-my-dining-hall/
-├── backend/              # FastAPI backend
+vandy-eats/
+├── backend/              # FastAPI
 │   ├── app/
-│   │   ├── models/      # SQLModel database models
-│   │   ├── routers/     # API endpoints
-│   │   ├── schemas/     # Pydantic schemas
-│   │   └── ...
-│   ├── alembic/         # Database migrations
-│   ├── tests/           # Pytest tests
-│   └── requirements.txt
-├── frontend/            # React frontend
-│   ├── src/
-│   │   ├── api/        # API client
-│   │   ├── components/ # React components
-│   │   ├── contexts/   # React contexts
-│   │   ├── pages/      # Page components
-│   │   └── ...
-│   └── package.json
-├── docker-compose.yml   # Docker Compose config
-└── .env.example         # Environment variables template
+│   │   ├── models/       # SQLModel database models
+│   │   ├── routers/      # API endpoints
+│   │   └── schemas/      # Pydantic schemas
+│   ├── alembic/          # Migrations
+│   └── tests/            # Pytest
+├── frontend/             # React + TypeScript
+│   └── src/              # api/, components/, contexts/, pages/
+├── docker-compose.yml
+└── .env.example
 ```
 
-## Contributing
+## Deployment
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Support
-
-For issues and questions, please open a GitHub issue.
+See [DEPLOYMENT.md](DEPLOYMENT.md) — backend on Render, frontend on Vercel, PostgreSQL on Render.
